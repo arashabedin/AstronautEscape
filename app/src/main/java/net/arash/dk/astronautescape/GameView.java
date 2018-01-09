@@ -1,29 +1,53 @@
 package net.arash.dk.astronautescape;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
+import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import net.arash.dk.astronautescape.R;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Random;
+
+import android.app.Fragment;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import static android.R.attr.fragment;
+import static android.R.attr.textViewStyle;
+
+/**
+ * Created by Arash on 10/28/2017.
+ */
 
 public class GameView extends SurfaceView implements Runnable {
-
+    //Using volatile keyword, so that the variable's value will be modified by different threads
     volatile boolean playing;
     private Thread gameThread = null;
     private Player player;
 
     //a screenX holder
     int screenX;
+    TextView textView;
+    String gameOverMsg="";
 
 
     //context to be used in onTouchEvent to cause the activity transition from GameAvtivity to MainActivity.
@@ -39,10 +63,7 @@ public class GameView extends SurfaceView implements Runnable {
     SharedPreferences sharedPreferences;
 
 
-    //to count the number of Misses
-    int countMisses;
-
-    //indicator that the enemy has just entered the game screen
+    //indicator that the fuel drop has just entered the game screen
     boolean flag ;
 
     //an indicator if the game is Over
@@ -53,31 +74,31 @@ public class GameView extends SurfaceView implements Runnable {
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
-    private Astroid.FuelDrop fuelDrop;
-
+    private FuelDrop fuelDrop;
 
 
     //created a reference of the class Friend
-    private Astroid astroid;
+    private Asteroid asteroid;
     private Planets planets;
 
     private ArrayList<Star> stars = new
             ArrayList<Star>();
 
-    //defining  boom and Revive objects
-    private Astroid.Boom boom;
-    private Revive revive;
+    //defining  boom object
+    private Boom boom;
+
 
 
 
     //the mediaplayer objects to configure the background music
     static  MediaPlayer gameOnsound;
 
-    final MediaPlayer killedEnemysound;
+
+    final MediaPlayer gotFuelSound;
 
     final MediaPlayer gameOversound;
 
-
+    Typeface typeface;
 
 
     public GameView(Context context, int screenX, int screenY) {
@@ -99,18 +120,17 @@ public class GameView extends SurfaceView implements Runnable {
 
 
 
+        AssetManager am = context.getApplicationContext().getAssets();
+        typeface = Typeface.createFromAsset(am, String.format(Locale.US, "fonts/%s", "bit.ttf"));
 
-        fuelDrop = new Astroid.FuelDrop(context,screenX,screenY);
+        fuelDrop = new FuelDrop(context,screenX,screenY);
 
-        //initializing boom and revive objects
-        boom = new Astroid.Boom(context);
-        revive = new Revive(context);
-
-        //initializing the Friend class object
-
+        //initializing boom object
+        boom = new Boom(context);
 
 
-        astroid = new Astroid(context, screenX, screenY);
+
+        asteroid = new Asteroid(context, screenX, screenY);
 
 
 
@@ -118,8 +138,6 @@ public class GameView extends SurfaceView implements Runnable {
         //setting the score to 0 initially
         score = 0;
 
-        //setting the countMisses to 0 initially
-        countMisses = 0;
 
 
         this.screenX = screenX;
@@ -132,16 +150,15 @@ public class GameView extends SurfaceView implements Runnable {
         sharedPreferences = context.getSharedPreferences("SHAR_PREF_NAME",Context.MODE_PRIVATE);
 
 
-        //initializing the array high scores with the previous values
-        highScore[0] = sharedPreferences.getInt("score1",0);
-        highScore[1] = sharedPreferences.getInt("score2",0);
-        highScore[2] = sharedPreferences.getInt("score3",0);
-        highScore[3] = sharedPreferences.getInt("score4",0);
+
 
 
         //initializing the media players for the game sounds
-        gameOnsound = MediaPlayer.create(context, R.raw.gameambient);
-        killedEnemysound = MediaPlayer.create(context,R.raw.killedenemy);
+
+            gameOnsound = MediaPlayer.create(context, R.raw.gameambient);
+
+
+        gotFuelSound = MediaPlayer.create(context,R.raw.gotfuel);
         gameOversound = MediaPlayer.create(context,R.raw.gameover);
 
         //starting the music to be played across the game
@@ -171,78 +188,51 @@ public class GameView extends SurfaceView implements Runnable {
     private void update() {
 
 
-
-
         //incrementing score as time passes
         score++;
 
         player.update(context);
-        player.setSpeed(((int)score/100)*10+10);
-
-        //setting boom and revive outside the screen
+          if(score<1200) {
+        player.setSpeed(((int) score / 100) * 10 + 10);
+          }
+        //setting boom outside the screen
         boom.setX(-250);
         boom.setY(-250);
 
-        revive.setX(-250);
-        revive.setY(-250);
 
         for (Star s : stars) {
 
             s.update(player.getSpeed());
         }
 
-        //setting the flag true when the enemy just enters the screen
-        if(fuelDrop.getX()==screenX){
+        //setting the flag true when the fuel drop just enters the screen
 
-            flag = true;
-        }
 
 
         fuelDrop.update(player.getSpeed());
                 //if collision occurs with player
                 if (Rect.intersects(player.getDetectCollision(), fuelDrop.getDetectCollision())) {
 
-                    //displaying revive at that location
-                    revive.setX(fuelDrop.getX());
-                    revive.setY(fuelDrop.getY());
 
+                    //playing a sound at the collision between player and the fuel drop
+                    gotFuelSound.start();
 
-                    //playing a sound at the collision between player and the enemy
-                    killedEnemysound.start();
-
-                    fuelDrop.setX(-200);
+                    //increment fuel
+                    player.setFuel(player.getFuel()+50);
+                    if (player.getFuel()>200){
+                        player.setFuel(200);
+                    }
+                    fuelDrop.setX(-300);
                 }
 
-                else{// the condition where player misses the enemy
-
-                    //if the enemy has just entered
-                    if(flag){
-
-                        //if player's x coordinate is equal to enemies's y coordinate
-                        if(player.getDetectCollision().exactCenterX()>=fuelDrop.getDetectCollision().exactCenterX()){
-
-                            //increment countMisses
-
-                            player.setFuel(player.getFuel()+30);
-                            if (player.getFuel()>200){
-                                player.setFuel(200);
-                            }
-
-                            //setting the flag false so that the else part is executed only when new enemy enters the screen
-                            flag = false;
-
-                        }
-                        }
-
-                }
 
 
 
         //updating the friend ships coordinates
-        astroid.update(context,player.getSpeed());
+        asteroid.update(context,player.getSpeed());
         planets.update(context,player.getSpeed());
                 //checking for a collision between player and a friend
-                if(Rect.intersects(player.getDetectCollision(),astroid.getDetectCollision())){
+                if(Rect.intersects(player.getDetectCollision(), asteroid.getDetectCollision())){
 
                     //displaying the boom at the collision
                     boom.setX(player.getX()+270);
@@ -250,6 +240,7 @@ public class GameView extends SurfaceView implements Runnable {
                     //setting playing false to stop the game
                     playing = false;
                     //setting the isGameOver true as the game is over
+                    gameOverMsg="Game Over";
                     isGameOver = true;
 
 
@@ -259,27 +250,51 @@ public class GameView extends SurfaceView implements Runnable {
                     //play the game over sound
                     gameOversound.start();
 
-                //Assigning the scores to the highscore integer array
-                    for(int i=0;i<4;i++){
 
-                        if(highScore[i]<score){
+                    //Updating Score to database
 
-                            final int finalI = i;
-                            highScore[i] = score;
-                            break;
+
+
+
+                    sharedPreferences  = context.getSharedPreferences("SHAR_PREF_NAME", Context.MODE_PRIVATE);
+                    SharedPreferences sp = context.getSharedPreferences("my_pref", Activity.MODE_PRIVATE);
+
+                    final String username =  sp.getString("username", "not given");
+                    final int score = this.score;
+                    final Activity activity = (Activity) context;
+
+                    Response.Listener<String> responseListener = new Response.Listener<String>(){
+                        @Override
+                        public void onResponse(String response){
+                            try {
+                                JSONObject jsonResponse = new JSONObject(response);
+                                boolean success = jsonResponse.getBoolean("success");
+                                if(success){
+
+
+                                    Toast.makeText(activity, "Your score " + score , Toast.LENGTH_LONG)
+                                            .show();
+                                }else{
+
+                                    Toast.makeText(activity, "Not Succeed:(", Toast.LENGTH_LONG)
+                                            .show();
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
                         }
+                    };
+                    UpdateScoreRequest updateScoreRequest = new UpdateScoreRequest( username, score,responseListener);
+
+                    RequestQueue queue = Volley.newRequestQueue(activity);
+                    queue.add(updateScoreRequest);
 
 
-                    }
-                    //storing the scores through shared Preferences
-                    SharedPreferences.Editor e = sharedPreferences.edit();
 
-                    for(int i=0;i<4;i++){
 
-                        int j = i+1;
-                        e.putInt("score"+j,highScore[i]);
-                    }
-                    e.apply();
+
 
                 }
 
@@ -288,11 +303,7 @@ public class GameView extends SurfaceView implements Runnable {
 
 
         if(player.getFuel()<1){
-
-            //displaying the boom at the collision
-           // boom.setX(player.getX()+270);
-            //boom.setY(player.getY());
-
+            gameOverMsg = "No Fuel";
             //setting playing false to stop the game
             playing = false;
             //setting the isGameOver true as the game is over
@@ -317,6 +328,7 @@ public class GameView extends SurfaceView implements Runnable {
 
 
             }
+
             //storing the scores through shared Preferences
             SharedPreferences.Editor e = sharedPreferences.edit();
 
@@ -338,7 +350,7 @@ public class GameView extends SurfaceView implements Runnable {
             canvas = surfaceHolder.lockCanvas();
             canvas.drawColor(Color.BLACK);
 
-
+            paint.setTypeface(typeface);
 
             paint.setColor(Color.WHITE);
             paint.setTextSize(20);
@@ -370,16 +382,13 @@ public class GameView extends SurfaceView implements Runnable {
 
                 );
 
-            //drawing the score on the game screen
-            paint.setTextSize(30);
-            canvas.drawText("Score:"+score,100,50,paint);
 
-            //drawing friends image
+            //drawing astroids image
             canvas.drawBitmap(
 
-                    astroid.getBitmap(),
-                    astroid.getX(),
-                    astroid.getY(),
+                    asteroid.getBitmap(),
+                    asteroid.getX(),
+                    asteroid.getY(),
                     paint
             );
 
@@ -391,18 +400,14 @@ public class GameView extends SurfaceView implements Runnable {
                     paint
             );
 
-            //drawing revive image
-            canvas.drawBitmap(
-                    revive.getBitmap(),
-                    revive.getX(),
-                    revive.getY(),
-                    paint
-            );
 
+            paint.setTextSize(45);
+            canvas.drawText("Score:"+score,getWidth()-500,50,paint);
+            paint.setTextSize(60);
+            paint.setColor(Color.argb(255,251,251,251));
 
-
-
-
+            canvas.drawText("↑",230,250,paint);
+            canvas.drawText("↓",230,getHeight()-250,paint);
 
             //draw game Over when the game is over
             if(isGameOver){
@@ -414,10 +419,9 @@ public class GameView extends SurfaceView implements Runnable {
 
 
 
-           //     Typeface myCustomFont = Typeface.createFromAsset(context.getAssets(), "fonts/visitor2.tff");
-             //   paint.setTypeface(myCustomFont);
-
-                canvas.drawText("Game Over",canvas.getWidth()/2,yPos,paint);
+                paint.setTypeface(typeface);
+                paint.setColor(Color.argb(255,255,255,255));
+                canvas.drawText(gameOverMsg,canvas.getWidth()/2,yPos,paint);
 
             }
 

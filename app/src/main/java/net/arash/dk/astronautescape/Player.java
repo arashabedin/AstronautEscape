@@ -8,10 +8,10 @@ import android.graphics.Rect;
 import net.arash.dk.astronautescape.R;
 
 import java.util.Random;
-
 /**
- * Created by Belal on 6/24/2016.
+ * Created by Arash on 10/28/2017.
  */
+
 public class Player {
     private Bitmap bitmap;
     private int x;

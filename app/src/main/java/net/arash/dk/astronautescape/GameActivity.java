@@ -7,7 +7,9 @@ import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Display;
-
+/**
+ * Created by Arash on 10/28/2017.
+ */
 public class GameActivity extends AppCompatActivity {
 
     //declaring gameview
@@ -39,12 +41,14 @@ public class GameActivity extends AppCompatActivity {
         gameView.pause();
     }
 
+
     //running the game when activity is resumed
     @Override
     protected void onResume() {
         super.onResume();
         gameView.resume();
     }
+
 
     @Override
     public void onBackPressed() {

@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@drawable/splash"
+    android:background="@drawable/bg"
     tools:context="net.arash.dk.astronautescape.MainActivity">
 
     <ImageButton
@@ -26,7 +26,40 @@
         android:background="@drawable/highscore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonCredit"
+        android:layout_centerHorizontal="true" />
+    <ImageButton
+        android:id="@+id/buttonCredit"
+
+        android:background="@drawable/credits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/etMyUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView10"
+        android:layout_alignBottom="@+id/textView10"
+        android:layout_marginLeft="15dp"
+        android:layout_marginStart="15dp"
+        android:layout_toEndOf="@+id/textView10"
+        android:layout_toRightOf="@+id/textView10"
+        android:text="TextView"
+        android:textColor="#fff"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="X"
+        android:textColor="#fff"
+        android:textSize="36sp" />
 
 </RelativeLayout>

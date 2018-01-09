@@ -1,10 +1,10 @@
 package net.arash.dk.astronautescape;
 
 import java.util.Random;
-
 /**
- * Created by Belal on 6/15/2016.
+ * Created by Arash on 10/28/2017.
  */
+
 public class Star {
     private int x;
     private int y;
