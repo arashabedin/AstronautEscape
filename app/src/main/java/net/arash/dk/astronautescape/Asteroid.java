@@ -20,7 +20,7 @@ public class Asteroid {
     private int x;
     private int y;
     private int speed = 1;
-
+    private boolean condition;
     private int maxX;
     private int minX;
 
@@ -30,9 +30,7 @@ public class Asteroid {
     //creating a rect object for a friendly ship
     private Rect detectCollision;
 
-    public void setBitmap(Bitmap bitmap){
-        this.bitmap = bitmap;
-    }
+
 
     public Asteroid(Context context, int screenX, int screenY) {
 
@@ -55,11 +53,21 @@ public class Asteroid {
     public void update(Context context,int playerSpeed) {
 
         //Animations
+        if(condition){
+            if(new Random().nextInt(2)==1){
+                setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.astroid_seq2_inv));
+            }else{
+                setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.astroid_inv));
+            }
 
+        }
+
+        else{
         if(new Random().nextInt(2)==1){
             setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.astroid_seq2));
         }else{
             setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.astroid));
+        }
         }
 
         x -= playerSpeed;
@@ -96,6 +104,13 @@ public class Asteroid {
     public int getY() {
         return y;
     }
-
-
+    public boolean getCondition(){
+        return condition;
+    }
+    public void setCondition( boolean condition){
+        this.condition = condition;
+    }
+    public void setBitmap(Bitmap bitmap){
+        this.bitmap = bitmap;
+    }
 }

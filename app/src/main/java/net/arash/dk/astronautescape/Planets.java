@@ -23,9 +23,9 @@ public class Planets {
 
     private int maxY;
     private int minY;
-
-
-
+    private boolean condition = false;
+    private boolean firstFrame = false;
+    private int currentPlanet = 1;
 
     public Planets(Context context, int screenX, int screenY) {
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.earth);
@@ -43,20 +43,74 @@ public class Planets {
     public void update(Context context, int playerSpeed) {
         x -= playerSpeed;
         x -= speed;
+
+        if(condition){
+            if (x < minX - bitmap.getWidth()) {
+                int rand = new Random().nextInt(4);
+                if (rand==1){
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet2_inv);
+                    currentPlanet=2;
+
+                }else if(rand==2){
+                    //    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.earth);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet3_inv);
+                    currentPlanet=3;
+
+                } else if(rand ==3){
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet3_inv);
+                    currentPlanet=3;
+
+
+                }else{
+
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet4_inv);
+                    currentPlanet=4;
+
+
+                }
+
+
+                Random generator = new Random();
+                speed = generator.nextInt(6);
+                x = maxX;
+                y = generator.nextInt(maxY) - bitmap.getHeight();
+            } else if(firstFrame){
+                    switch (currentPlanet){
+                        case 1 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.earth_inv);
+                            break;
+                        case 2 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet2_inv);
+                            break;
+                        case 3 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet3_inv);
+                            break;
+                        case 4 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet4_inv);
+
+
+
+                    }
+                    firstFrame = false;
+
+            }
+
+        }
+        else{
         if (x < minX - bitmap.getWidth()) {
             int rand = new Random().nextInt(4);
             if (rand==1){
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet2);
+                currentPlanet=2;
             }else if(rand==2){
             //    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.earth);
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet3);
+                currentPlanet=3;
 
             } else if(rand ==3){
-                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet3);
+                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet2);
+                currentPlanet=2;
 
             }else{
 
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet4);
+                currentPlanet=4;
 
             }
 
@@ -65,6 +119,22 @@ public class Planets {
             speed = generator.nextInt(6);
             x = maxX;
             y = generator.nextInt(maxY) - bitmap.getHeight();
+        }else if(firstFrame){
+            switch (currentPlanet){
+                case 1 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.earth);
+                    break;
+                case 2 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet2);
+                    break;
+                case 3 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet3);
+                    break;
+                case 4 : bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet4);
+
+
+
+            }
+            firstFrame = false;
+
+        }
         }
     }
 
@@ -80,5 +150,14 @@ public class Planets {
     public int getY() {
         return y;
     }
+    public boolean getCondition(){
+        return condition;
+    }
+    public void setCondition( boolean condition){
+        this.condition = condition;
+    }
+    public void setFirstFrame(boolean firstFrame){
+        this.firstFrame = firstFrame;
 
+    }
 }

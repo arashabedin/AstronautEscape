@@ -21,8 +21,8 @@
             android:name=".GameActivity"
             android:screenOrientation="landscape" />
         <activity
-        android:name=".HighScore"
-        android:screenOrientation="landscape" />
+            android:name=".HighScore"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".Credit"
             android:screenOrientation="landscape" />

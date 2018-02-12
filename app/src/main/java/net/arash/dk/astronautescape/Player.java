@@ -29,7 +29,7 @@ public class Player {
     private final int MAX_SPEED = 2000;
 
     private Rect detectCollision;
-
+    private boolean condition = false;
 
     private int fuel = 200;
 
@@ -55,8 +55,6 @@ public class Player {
         boosting = false;
         goUp= false;
         goDown=false;
-
-
 
         //initializing rect object
         detectCollision =  new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
@@ -86,42 +84,89 @@ public class Player {
 
         //Player's animation effect
         if(fuel > 150){
-        if(new Random().nextInt(2)==1){
+            if(condition){
+                if(new Random().nextInt(2)==1){
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq2_inv));
+                }else{
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_inv));
+                }
+            }else {
+
+                if(new Random().nextInt(2)==1){
            setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq2));
         }else{
            setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player));
         }}
+        }
+
+
         else if(fuel > 100){
+
+            if(condition){
+                if(new Random().nextInt(2)==1){
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq4_inv));
+                }else{
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq3_inv));
+                }
+            }else{
 
             if(new Random().nextInt(2)==1){
                 setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq4));
             }else{
                 setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq3));
             }
-
-        }     else if(fuel > 50){
-
-            if(new Random().nextInt(2)==1){
-                setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq5));
-            }else{
-                setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq4));
             }
 
-        }else if(fuel > 10){
 
-            if(new Random().nextInt(2)==1){
+
+
+        }     else if(fuel > 50){
+            if(condition){
+                if(new Random().nextInt(2)==1){
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq5_inv));
+                }else{
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq4_inv));
+                }
+            }else {
+
+
+                if (new Random().nextInt(2) == 1) {
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq5));
+                } else {
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq4));
+                }
+            }
+        }else if(fuel > 10){
+            if(condition){
+                if(new Random().nextInt(2)==1){
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq6_inv));
+                }else{
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq5_inv));
+                }
+            }else {
+
+
+                if(new Random().nextInt(2)==1){
                 setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq6));
             }else{
                 setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq5));
-            }
+            }}
 
         }   else {
+            if(condition){
+                if(new Random().nextInt(2)==1){
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq6_inv));
+                }else{
+                    setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq6_inv));
+                }
+            }else {
 
-        if(new Random().nextInt(2)==1){
+
+                if(new Random().nextInt(2)==1){
             setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq6));
         }else{
             setBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.player_seq6));
-        }
+        }}
 
     }
 
@@ -181,4 +226,11 @@ public class Player {
         return speed;
     }
     public void setSpeed(int speed){this.speed= speed;}
+    public boolean getCondition(){
+        return condition;
+    }
+    public void setCondition( boolean condition){
+        this.condition = condition;
+
+    }
 }
