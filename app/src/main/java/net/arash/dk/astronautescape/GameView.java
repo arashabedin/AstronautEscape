@@ -39,6 +39,7 @@ public class GameView extends SurfaceView implements Runnable {
     private Player player;
     private int bgColor = Color.BLACK;
     private int starColor = Color.WHITE;
+    int gameLostColor = Color.argb(255,255,255,255);
     private boolean invertedUniverse = false;
     //a screenX holder
     int screenX;
@@ -101,7 +102,6 @@ public class GameView extends SurfaceView implements Runnable {
         super(context);
         player = new Player(context, screenX, screenY);
 
-
         surfaceHolder = getHolder();
         paint = new Paint();
 
@@ -128,7 +128,6 @@ public class GameView extends SurfaceView implements Runnable {
 
 
         asteroid = new Asteroid(context, screenX, screenY);
-
 
 
         planets = new Planets(context, screenX, screenY);
@@ -189,8 +188,8 @@ public class GameView extends SurfaceView implements Runnable {
             blackHole.setReadyToInvert(true);
         }
         player.update(context);
-          if(score<1200) {
-        player.setSpeed(((int) score / 100) * 10 + 10);
+          if((score < 1200) || ((1500 > score) &&(score < 1600))) {
+        player.setSpeed(((int) score / 10)  + 10);
           }
         //setting boom outside the screen
         boom.setX(-250);
@@ -211,7 +210,6 @@ public class GameView extends SurfaceView implements Runnable {
                 //if collision occurs with player
                 if (Rect.intersects(player.getDetectCollision(), fuelDrop.getDetectCollision())) {
 
-
                     //playing a sound at the collision between player and the fuel drop
                     gotFuelSound.start();
 
@@ -228,6 +226,10 @@ public class GameView extends SurfaceView implements Runnable {
 //Blackhole collision
         if (Rect.intersects(player.getDetectCollision(), blackHole.getDetectCollision())) {
         if(!invertedUniverse){
+            if(firstInvertedUniverse){
+                paint.setColor(gameLostColor);
+                canvas.drawText(gameOverMsg,canvas.getWidth()/2,40,paint);
+            }
             final float volume = (float) (1 - (Math.log(100 - 50) / Math.log(100)));
             gameOnsound.setVolume(volume,volume);
             invertedUniverseSound.start();
@@ -242,10 +244,12 @@ public class GameView extends SurfaceView implements Runnable {
             planets.setFirstFrame(true);
             blackHole.setX(-1000);
             invertedUniverseSound.start();
+            gameLostColor = Color.argb(255,0,0,0);
 
         }else{
             final float volume = (float) (1 - (Math.log(100 - 99) / Math.log(100)));
-            gameOnsound.setVolume(volume,volume);            invertedUniverseSound.pause();
+            gameOnsound.setVolume(volume,volume);
+            invertedUniverseSound.pause();
             invertedUniverse = false;
             player.setCondition(false);
             asteroid.setCondition(false);
@@ -256,6 +260,8 @@ public class GameView extends SurfaceView implements Runnable {
             planets.setCondition(false);
             planets.setFirstFrame(true);
             blackHole.setX(-1000);
+            gameLostColor = Color.argb(255,255,255,255);
+
 
         }
         }
@@ -478,7 +484,7 @@ public class GameView extends SurfaceView implements Runnable {
 
 
                 paint.setTypeface(typeface);
-                paint.setColor(Color.argb(255,255,255,255));
+                paint.setColor(gameLostColor);
                 canvas.drawText(gameOverMsg,canvas.getWidth()/2,yPos,paint);
 
             }
@@ -562,12 +568,17 @@ public class GameView extends SurfaceView implements Runnable {
 
 
     public String illustrateFule(int currentFuel){
+        if (currentFuel > 200){
+            currentFuel = 200;
+        }
         String myIllustration = "";
     for (int i = 0; i< Math.floor((currentFuel+30)/40); i++){
         myIllustration += "|";
     }
     return myIllustration;
     }
+
+
 
 }
 

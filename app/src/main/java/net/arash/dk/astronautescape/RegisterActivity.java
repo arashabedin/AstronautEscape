@@ -1,10 +1,12 @@
 package net.arash.dk.astronautescape;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -98,10 +100,22 @@ else if(!password.equals(password2) ){
     RegisterRequest registerRequest = new RegisterRequest(username, password, responseListener);
     RequestQueue queue = Volley.newRequestQueue(RegisterActivity.this);
     queue.add(registerRequest);
+    if(!isNetworkConnected()){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+        builder.setMessage("No internet connection:(").setNegativeButton("Try again", null).create().show();
+
+    }
 }}
 
         });
 
 
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 }

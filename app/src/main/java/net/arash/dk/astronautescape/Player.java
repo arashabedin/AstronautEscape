@@ -31,7 +31,7 @@ public class Player {
     private Rect detectCollision;
     private boolean condition = false;
 
-    private int fuel = 200;
+    private int fuel = 300;
 
     public int getFuel(){
         return fuel;
